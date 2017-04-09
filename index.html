@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<title>
+			Mera Naksha
+		</title>
+		<!--Leaflet-->
+		<link rel="stylesheet" href="lib/leaflet/leaflet.css"/>
+		<link rel="stylesheet" href="lib/leaflet/routing/leaflet-routing-machine.css"/>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script src="lib/leaflet/leaflet.js"></script>
+		<script src="data/countries.geojson"></script>
+		<script src="lib/leaflet/routing/leaflet-routing-machine.js"></script>
+		<script src="lib/leaflet/routing/lrm-graphhopper.js"></script>
+		<style type="text/css">
+			#map{ height : 400px;}
+			.legend{ background : white; line-height : 1.5em}
+			.legend i { width :5em; float : left }
+		</style>
+		<style>
+			.map {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Naksha</h1>
+		<form id="mapFormId">
+			Distance :
+			<input id="distanceBox" type="text" name="Fname">
+		</form>
+		<div id="map" class ="map"></div>	
+		<script>
+			<!-- Add countries in map -->
+			var map = L.map('map').setView([43.8476,18.3564], 6);
+			//var countriesLayer = L.geoJson(countries).addTo(map);
+			
+			<!-- Legends -->
+			var legend = L.control({position : 'bottomright'});
+			legend.onAdd = function(map){
+				var div = L.DomUtil.create('div','legend');
+				var labels = ["Teams", "Support staff", "Pitstop"];
+				var grades = ['Green', 'Blue', 'Red'];
+				div.innerHTML = '<div><b>Legend</b></div>';
+				for( var i =0; i < grades.length; ++i)
+				{
+					div.innerHTML += '<i style ="background:' +
+					grades[i] +'">&nbsp;&nbsp;</i>&nbsp;&nbsp;' +
+					labels[i] + '<br/>';
+				}
+				return div;
+			}
+			legend.addTo(map);
+			
+			<!-- Add Markers in map -->
+			var point1 = [43.86667, 18.566644];
+			var point2 = [20.89963, 89.35665];
+			var iconPoint2 = L.icon (
+			{
+				iconUrl:'MapMarker_Ball__Azure.png',
+				iconSize: [20,20],
+				iconAnchor : [22,94],
+				popupAnchor : [-3,-76]
+			});
+			var point3 = [5.89963, 112.35665];
+			var iconPoint3 = L.icon (
+			{
+				iconUrl:'MapMarker_Ball__Chartreuse.png',
+				iconSize: [20,20],
+				iconAnchor : [22,94],
+				popupAnchor : [-3,-76]
+			});
+			var marker1 = L.marker(point1).addTo(map);
+			var marker2 = L.marker(point2,{icon : iconPoint2}).addTo(map);
+			var marker3 = L.marker(point3,{icon : iconPoint3}).addTo(map);
+			
+			<!-- Routing -- >
+			var i = 0;
+			var routeControl = null;
+			var coordArr = {} ;
+			var startMarker = L.marker([51.74, 11.94], { draggable: false}).addTo(map);
+			var endMarker = L.marker([50.6792, 12.949], { draggable: false}).addTo(map);
+			function routeImpl(){
+			L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
+				attribution: '© OpenStreetMap contributors'
+			}).addTo(map);			
+			
+			if ( null == routeControl ){
+				//Create route control
+				routeControl = L.Routing.control({
+				waypoints: [
+				L.latLng(51.74, 11.94),
+				L.latLng(50.6792, 12.949)
+				],
+				createMarker: function(i, waypoint, n){
+					if ( 0 == i ){return startMarker;}
+					return endMarker;
+				},
+				routeWhileDragging: true,
+				router: L.Routing.graphHopper('49b2a42d-a150-46bc-9edc-e60a10a781fd')
+				//geocoder: L.Control.Geocoder.nominatim()
+			}).addTo(map);}		
+			// override		
+			setTimeout(routeImpl, 500);			
+			routeControl.on('routesfound', function(e) {
+			var routes = e.routes;				
+			var distance = routes[0].summary.totalDistance;
+			$('#distanceBox').val(distance/1000);
+			coordArr = routes[0].coordinates.slice();				
+			});
+			var newLatlng = L.latLng(coordArr[i].lat, coordArr[i].lng);
+			if( !(newLatlng.equals(L.latLng(50.6792, 12.949)) ) )
+			{				
+				startMarker.setLatLng(newLatlng);
+				startMarker.addTo(map);
+				//e.waypoints[0].latLng
+				++i;
+			}	
+			}		
+			routeImpl();
+		</script>
+	</body>
+</html>
