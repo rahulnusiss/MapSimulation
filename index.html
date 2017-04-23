@@ -82,8 +82,12 @@
 			var i = 0;
 			var routeControl = null;
 			var coordArr = {} ;
-			var startMarker = L.marker([51.74, 11.94], { draggable: false}).addTo(map);
-			var endMarker = L.marker([50.6792, 12.949], { draggable: false}).addTo(map);
+			var latitude1 = 1.3046014;
+			var longitude1 = 103.7701238;
+			var latitude2 = 1.3644202;
+			var longitude2 = 103.9893421;
+			var startMarker = L.marker([latitude1, longitude1], { draggable: false}).addTo(map);
+			var endMarker = L.marker([latitude2, longitude2], { draggable: false}).addTo(map);
 			function routeImpl(){
 			L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
 				attribution: '© OpenStreetMap contributors'
@@ -93,8 +97,8 @@
 				//Create route control
 				routeControl = L.Routing.control({
 				waypoints: [
-				L.latLng(51.74, 11.94),
-				L.latLng(50.6792, 12.949)
+				L.latLng(latitude1, longitude1),
+				L.latLng(latitude2, longitude2)
 				],
 				createMarker: function(i, waypoint, n){
 					if ( 0 == i ){return startMarker;}
