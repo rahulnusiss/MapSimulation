@@ -80,14 +80,37 @@
 			
 			<!-- Routing -- >
 			var i = 0;
+			var finish = 0;
 			var routeControl = null;
 			var coordArr = {} ;
+			
+			<!-- 1st way  From 1 to 2-- >
 			var latitude1 = 1.3046014;
 			var longitude1 = 103.7701238;
-			var latitude2 = 1.3644202;
-			var longitude2 = 103.9893421;
+			var latitude2 = 1.2838627;
+			var longitude2 = 103.8493554;
 			var startMarker = L.marker([latitude1, longitude1], { draggable: false}).addTo(map);
 			var endMarker = L.marker([latitude2, longitude2], { draggable: false}).addTo(map);
+			
+			var startMarkerTeam2 = L.marker([latitude1, longitude1], { draggable: false}).addTo(map);
+			var startMarkerTeam3 = L.marker([latitude1, longitude1], { draggable: false}).addTo(map);
+			
+			<!-- 2nd way, From 2 to 3 -- >
+			var routeControl2 = null;
+			var coordArr2 = {} ;
+			var latitude3 = 1.300599;
+			var longitude3 = 103.8527043;
+			var startMarker2 = L.marker([latitude2, longitude2], { draggable: false}).addTo(map);
+			var endMarker2 = L.marker([latitude3, longitude3], { draggable: false}).addTo(map);
+			
+			<!-- 3rd way From 3 to 4-- >
+			var routeControl3 = null;
+			var coordArr3 = {} ;
+			var latitude4 = 1.3075337;
+			var longitude4 = 103.8609886;
+			var startMarker3 = L.marker([latitude3, longitude3], { draggable: false}).addTo(map);
+			var endMarker3 = L.marker([latitude4, longitude4], { draggable: false}).addTo(map);
+			
 			function routeImpl(){
 			L.tileLayer( 'http://{s}.tile.osm.org/{z}/{x}/{y}{r}.png', {
 				attribution: '© OpenStreetMap contributors'
@@ -107,24 +130,145 @@
 				routeWhileDragging: true,
 				router: L.Routing.graphHopper('49b2a42d-a150-46bc-9edc-e60a10a781fd')
 				//geocoder: L.Control.Geocoder.nominatim()
-			}).addTo(map);}		
+			}).addTo(map);}	
+			
+			if ( null == routeControl2 ){
+				//Create route control
+				routeControl2 = L.Routing.control({
+				waypoints: [
+				L.latLng(latitude2, longitude2),
+				L.latLng(latitude3, longitude3)
+				],
+				createMarker: function(i, waypoint, n){
+					if ( 0 == i ){return startMarker2;}
+					return endMarker2;
+				},
+				routeWhileDragging: true,
+				router: L.Routing.graphHopper('49b2a42d-a150-46bc-9edc-e60a10a781fd')
+				//geocoder: L.Control.Geocoder.nominatim()
+			}).addTo(map);}
+			
+			if ( null == routeControl3 ){
+				//Create route control
+				routeControl3 = L.Routing.control({
+				waypoints: [
+				L.latLng(latitude3, longitude3),
+				L.latLng(latitude4, longitude4)
+				],
+				createMarker: function(i, waypoint, n){
+					if ( 0 == i ){return startMarker3;}
+					return endMarker3;
+				},
+				routeWhileDragging: true,
+				router: L.Routing.graphHopper('49b2a42d-a150-46bc-9edc-e60a10a781fd')
+				//geocoder: L.Control.Geocoder.nominatim()
+			}).addTo(map);}	
 			// override		
-			setTimeout(routeImpl, 500);			
+						
 			routeControl.on('routesfound', function(e) {
 			var routes = e.routes;				
 			var distance = routes[0].summary.totalDistance;
 			$('#distanceBox').val(distance/1000);
 			coordArr = routes[0].coordinates.slice();				
+			});	
+			
+			routeControl2.on('routesfound', function(e) {
+			var routes = e.routes;				
+			var distance = routes[0].summary.totalDistance;
+			$('#distanceBox').val(distance/1000);
+			coordArr2 = routes[0].coordinates.slice();				
+			});			
+			
+			routeControl3.on('routesfound', function(e) {
+			var routes = e.routes;				
+			var distance = routes[0].summary.totalDistance;
+			$('#distanceBox').val(distance/1000);
+			coordArr3 = routes[0].coordinates.slice();				
 			});
-			var newLatlng = L.latLng(coordArr[i].lat, coordArr[i].lng);
-			if( !(newLatlng.equals(L.latLng(50.6792, 12.949)) ) )
-			{				
-				startMarker.setLatLng(newLatlng);
-				startMarker.addTo(map);
-				//e.waypoints[0].latLng
-				++i;
-			}	
+			setTimeout(displaceMarker, 2000);	
 			}		
+			
+			var displaceMarker = function(){				
+				var newLatlng = L.latLng(coordArr[i].lat, coordArr[i].lng);
+				if( !(newLatlng.equals(L.latLng(latitude2, longitude2)) ) )
+				{								
+					startMarker.setLatLng(newLatlng);
+					startMarker.addTo(map);
+					//e.waypoints[0].latLng
+					++i;
+					console.log('i =',i);
+					if ( 0 == finish ){
+						setTimeout(displaceMarker, 500);
+					}
+					else{						
+						raceFinish;					
+					}
+				}
+				if( i == coordArr.length ){
+					i = 0;
+					startMarker.setLatLng(L.latLng(latitude2, longitude2));
+					startMarker.addTo(map);
+					console.log('coordArr2.length',coordArr2.length);
+					setTimeout(displaceMarker2, 500);
+				}
+				
+				
+			}
+			
+			var displaceMarker2 = function(){				
+				
+				var newLatlng = L.latLng(coordArr2[i].lat, coordArr2[i].lng);
+				if( !(newLatlng.equals(L.latLng(latitude3, longitude3)) ) )
+				{				
+					startMarker.setLatLng(newLatlng);
+					startMarker.addTo(map);
+					//e.waypoints[0].latLng
+					i = i + 1;
+					console.log('i =',i);
+					if ( 0 == finish ){
+						setTimeout(displaceMarker2, 500);
+					}
+					else{						
+						raceFinish;					
+					}					
+				}
+				if( i == coordArr2.length ){
+					i = 0;
+					startMarker.setLatLng(L.latLng(latitude3, longitude3));
+					startMarker.addTo(map);
+					console.log('coordArr3.length',coordArr3.length);
+					setTimeout(displaceMarker3, 500);
+				}
+				
+			}
+			
+			var displaceMarker3 = function(){
+				
+				
+				var newLatlng = L.latLng(coordArr3[i].lat, coordArr3[i].lng);				
+				if( !(newLatlng.equals(L.latLng(latitude4, longitude4)) ) )
+				{							
+					startMarker.setLatLng(newLatlng);
+					startMarker.addTo(map);
+					//e.waypoints[0].latLng
+					++i;
+					if ( 0 == finish ){
+						setTimeout(displaceMarker3, 500);
+					}
+					else{						
+						raceFinish;					
+					}					
+				}	
+				if( i == (coordArr3.length-1) ){
+					finish = 1;
+					console.log('Should Finish', finish);
+					throw new Error("Something went badly wrong!");					
+				}				
+			}
+			
+			var raceFinish = function(){
+				throw new Error("Race Finish!");
+			}
 			routeImpl();
 		</script>
 	</body>
